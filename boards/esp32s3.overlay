@@ -1,0 +1,103 @@
+/ {
+    chosen {
+        zephyr,display = &ili9341;
+        zephyr,touch = &xpt2046;
+    };
+
+    lvgl_pointer {
+		compatible = "zephyr,lvgl-pointer-input";
+		input = <&xpt2046>;
+        // invert-x;
+        invert-y;
+	};
+
+    esp32c6_tft_ili9341: esp32c6_tft_ili9341 {
+        compatible = "zephyr,mipi-dbi-spi";
+        spi-dev = <&spi2>;             // changed
+        status = "okay";
+        dc-gpios = <&gpio0 6 GPIO_ACTIVE_HIGH>;
+        reset-gpios = <&gpio0 5 GPIO_ACTIVE_LOW>;
+        #address-cells = <1>;
+        #size-cells = <0>;
+        write-only;
+        ili9341: ili9341@0 {
+            compatible = "ilitek,ili9341";
+            mipi-max-frequency = <10000000>;
+            reg = <0>;
+            width = <240>;
+            height = <320>;
+            rotation = <90>;
+            pixel-format = <1>;
+            // gamset = [ 01  ];
+            // pgamctrl = [ 0F 29 24 0c 0e 09 4e 78 3c 09 13 05 17 11 00  ];
+            // ngamctrl = [ 00 16 1b 04 11 07 31 33 42 05 0c 0a 28 2f 0f  ];
+        };
+    };
+};
+
+&spi2 {
+	status = "okay";
+	pinctrl-0 = <&spi2m_pins>;
+	pinctrl-names = "default";
+    // xpt2046: xpt2046@1 {
+    //     compatible = "xptek,xpt2046";
+    //     status = "okay";
+    //     reg = <1>;
+    //     spi-max-frequency = <2000000>;
+    //     int-gpios = <&gpio0 15 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+    //     touchscreen-size-x = <240>;
+    //     touchscreen-size-y = <320>;
+    //     min-x = <200>;
+    //     min-y = <200>;
+    //     max-x = <3900>;
+    //     max-y = <3900>;
+    //     z-threshold = <100>;
+    // };
+};
+
+&spi3 {
+	status = "okay";
+	pinctrl-0 = <&spi3m_pins>;
+	pinctrl-names = "default";
+    xpt2046: xpt2046@0 {
+        compatible = "xptek,xpt2046";
+        status = "okay";
+        reg = <0>;
+        spi-max-frequency = <2000000>;
+        int-gpios = <&gpio0 1 GPIO_ACTIVE_LOW>;
+        touchscreen-size-x = <240>;
+        touchscreen-size-y = <320>;
+        min-x = <200>;
+        min-y = <200>;
+        max-x = <3900>;
+        max-y = <3900>;
+        z-threshold = <100>;
+    };
+};
+
+&pinctrl {
+    spi2m_pins: spi2m_pins {
+        group1 {
+			pinmux = <SPIM2_MISO_GPIO16>,
+				 <SPIM2_SCLK_GPIO15>,
+				 <SPIM2_CSEL_GPIO4>;
+		};
+
+		group2 {
+			pinmux = <SPIM2_MOSI_GPIO7>;
+			output-low;
+		};
+    };
+    spi3m_pins: spi3m_pins {
+        group1 {
+			pinmux = <SPIM3_MISO_GPIO2>,
+				 <SPIM3_SCLK_GPIO40>,
+				 <SPIM3_CSEL_GPIO41>;
+		};
+
+		group2 {
+			pinmux = <SPIM3_MOSI_GPIO42>;
+			output-low;
+		};
+    };
+};
